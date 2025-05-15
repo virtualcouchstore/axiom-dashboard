@@ -37,6 +37,11 @@ filtered_df = df[
 
 top_df = filtered_df.sort_values("total_volume", ascending=False).head(top_n_wallets)
 
+# Add Solscan link column
+top_df["Wallet Address"] = top_df["wallet_address"].apply(
+    lambda x: f"[{x}](https://solscan.io/account/{x})"
+)
+
 # KPI Section
 st.subheader("Key Metrics")
 col1, col2, col3, col4 = st.columns(4)
@@ -45,9 +50,19 @@ col2.metric("Total Volume", f"${top_df['total_volume'].sum():,.0f}")
 col3.metric("Total Fees", f"${top_df['fees_usd'].sum():,.0f}")
 col4.metric("Total Net PnL", f"${top_df['net_pnl'].sum():,.0f}")
 
-# Wallet Table
+# Wallet Table with clickable links
 st.subheader("Filtered Wallets")
-st.dataframe(top_df.sort_values("total_volume", ascending=False), use_container_width=True)
+st.markdown("Wallet addresses below link to Solscan")
+st.write(
+    top_df[["Wallet Address", "total_volume", "fees_usd", "net_pnl", "trade_count"]]
+    .rename(columns={
+        "total_volume": "Total Volume",
+        "fees_usd": "Fees (USD)",
+        "net_pnl": "Net PnL",
+        "trade_count": "Trades"
+    }),
+    unsafe_allow_html=True
+)
 
 # Scatter Plot
 st.subheader("Fees vs Net PnL")
