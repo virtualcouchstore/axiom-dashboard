@@ -50,19 +50,44 @@ col2.metric("Total Volume", f"${top_df['total_volume'].sum():,.0f}")
 col3.metric("Total Fees", f"${top_df['fees_usd'].sum():,.0f}")
 col4.metric("Total Net PnL", f"${top_df['net_pnl'].sum():,.0f}")
 
-# Wallet Table with clickable links
+# Wallet Table with HTML-rendered clickable red links
 st.subheader("Filtered Wallets")
-st.markdown("Wallet addresses below link to Solscan")
-st.write(
-    top_df[["Wallet Address", "total_volume", "fees_usd", "net_pnl", "trade_count"]]
-    .rename(columns={
-        "total_volume": "Total Volume",
-        "fees_usd": "Fees (USD)",
-        "net_pnl": "Net PnL",
-        "trade_count": "Trades"
-    }),
-    unsafe_allow_html=True
-)
+st.markdown("Wallet addresses below are clickable links to Solscan.")
+
+# Create HTML table manually
+html_rows = ""
+for _, row in top_df.iterrows():
+    addr = row["wallet_address"]
+    link = f"https://solscan.io/account/{addr}"
+    html_rows += f"""
+        <tr>
+            <td><a href="{link}" target="_blank" style="color:red;text-decoration:none;">{addr}</a></td>
+            <td>{row['total_volume']:,}</td>
+            <td>{row['fees_usd']:,}</td>
+            <td>{row['net_pnl']:,}</td>
+            <td>{row['trade_count']}</td>
+        </tr>
+    """
+
+html_table = f"""
+<table style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th align="left">Wallet Address</th>
+            <th align="left">Total Volume</th>
+            <th align="left">Fees (USD)</th>
+            <th align="left">Net PnL</th>
+            <th align="left">Trades</th>
+        </tr>
+    </thead>
+    <tbody>
+        {html_rows}
+    </tbody>
+</table>
+"""
+
+st.markdown(html_table, unsafe_allow_html=True)
+
 
 # Scatter Plot
 st.subheader("Fees vs Net PnL")
